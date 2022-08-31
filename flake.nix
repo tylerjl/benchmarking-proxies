@@ -11,7 +11,10 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ inputs.devshell.overlay ];
+          overlays = [
+            inputs.devshell.overlay
+            self.overlays.default
+          ];
         };
       in with pkgs; rec {
         devShell = devshell.mkShell {
@@ -28,10 +31,17 @@
             value = "hostfwd=tcp::8080-:8080,hostfwd=tcp::8081-:8081,hostfwd=tcp::2222-:22";
           }];
           packages = [
-            awscli2 caddy darkhttpd gnuplot k6 nixos-shell nginx rs terraform wrk2
-            (lighttpd.override {
-              enableMagnet = true;
-            })
+            awscli2
+            caddy
+            darkhttpd
+            gnuplot
+            k6
+            lighttpd
+            nixos-shell
+            nginx
+            rs
+            terraform
+            wrk2
           ];
         };
         packages.static-html = pkgs.buildEnv {
@@ -47,6 +57,9 @@
       in {
         overlays.default = prev: final: {
           static-html = self.packages.${system}.static-html;
+          lighttpd = final.lighttpd.override {
+            enableMagnet = true;
+          };
         };
         nixosConfigurations = {
           aws-bench = nixpkgs.lib.nixosSystem {
