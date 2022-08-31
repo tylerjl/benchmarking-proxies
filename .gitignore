@@ -1,0 +1,6 @@
+.terraform*
+terraform.tfstate**.json
+*.qcow2
+terraform.tfstate
+terraform.tfstate.backup
+results/

@@ -1,0 +1,8 @@
+Host *
+     UserKnownHostsFile=/dev/null
+     StrictHostKeyChecking no
+     User root
+     LogLevel ERROR
+
+Host bench
+     ProxyCommand bash -c "nc $(terraform output -raw public_dns) %p"
