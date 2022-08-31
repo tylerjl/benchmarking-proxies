@@ -1,10 +1,12 @@
-((.metrics[$var].values
+(.metrics[$var].values
 | [
-    ["min", .min],
-    ["med", .med],
-    ["avg", .avg],
-    ["p90", .["p(90)"]],
-    ["p95", .["p(95)"]],
-    ["max", .max]
-]) + [["requests", .metrics.http_reqs.values.count]])[]
-  | @tsv
+  .min,
+   .med,
+   .avg,
+   .["p(90)"],
+   .["p(95)"],
+   .max
+]) + [
+  .metrics.http_reqs.values.count,
+  (.metrics.http_req_failed.values.rate * 100)
+] | join(" ")

@@ -28,7 +28,7 @@
             value = "hostfwd=tcp::8080-:8080,hostfwd=tcp::8081-:8081,hostfwd=tcp::2222-:22";
           }];
           packages = [
-            awscli2 caddy darkhttpd gnuplot k6 nixos-shell nginx terraform wrk2
+            awscli2 caddy darkhttpd gnuplot k6 nixos-shell nginx rs terraform wrk2
             (lighttpd.override {
               enableMagnet = true;
             })

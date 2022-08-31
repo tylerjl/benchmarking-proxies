@@ -93,38 +93,37 @@ function postprocess_resources {
             -e "caddy='results/caddy-$test_type-$test_concurrency-formatted.txt'" \
             -e "nginx='results/nginx-$test_type-$test_concurrency-formatted.txt'" \
             resources.gp \
-            > results/resources-${test_type}-${test_concurrency}c-$(date +%s).svg
+            > results/resources-${test_type}-${test_concurrency}c.svg
     done
     rm ${cleanup[@]}
 }
 
 function postprocess_metrics {
-    plots=()
+    echo "test min median average p90 p95 max requests errors" > results/plot.txt
     for test_type in ${tests[@]}
     do
-        to_join=()
         for svc in ${proxies[@]}
         do
             raw=results/$svc-$test_type-$test_concurrency.json
-            processed=results/$svc-$test_type-duration-$test_concurrency.tsv
             jq --arg var http_req_duration -r -f metric.jq $raw \
-                | sed "1i metric ${svc}-${test_type}" \
-                        > $processed
-            to_join+=($processed)
+                | xargs echo "${svc}-${test_type}" \
+                        >> results/plot.txt
         done
-        plot=results/$test_type-duration-plot.txt
-        join ${to_join[@]} > $plot
-        rm ${to_join[@]}
-        plots+=($plot)
     done
 
-    join ${plots[@]} > results/plot.txt
-    rm ${plots[@]}
+    rs -Tc' ' < results/plot.txt | sponge results/plot.txt
+    cp results/{plot.txt,table-${test_concurrency}.txt}
+    sed -n '1p;/requests/p' results/plot.txt > results/requests.txt
+    sed -n '1p;/error/p' results/plot.txt > results/errors.txt
+    sed -i '/requests/d;/error/d' results/plot.txt
     gnuplot \
             -e "data='results/plot.txt'" \
+            -e "requests='results/requests.txt'" \
+            -e "errors='results/errors.txt'" \
+            -e "concurrency='$test_concurrency'" \
             -e "test_type='duration'" \
-            metrics.gp > results/metrics-duration-${test_concurrency}c-$(date +%s).svg
-    rm results/plot.txt
+            metrics.gp > results/metrics-duration-${test_concurrency}c.svg
+    rm results/{errors,plot,requests}.txt
 }
 
 function postprocess_tests {
