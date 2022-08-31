@@ -7,6 +7,7 @@ test_duration=30
 test_concurrency=${VUS:-200}
 tests=(synthetic html)
 proxies=(caddy nginx)
+suffix=${SUFFIX:-''}
 
 function ssh_ { ssh -F ssh_config $@; }
 function scp_ { scp -F ssh_config $@; }
@@ -53,7 +54,7 @@ function run_tests {
                 --include-children \
                 --interval 0.1 \
                 --duration $(( $test_duration + 15 )) \
-                --log $svc-$test_uri-$test_concurrency.txt" &
+                --log $svc-$test_uri-$test_concurrency$suffix.txt" &
             record=$!
             ssh_ $dri_pub \
                  "TEST_TARGET=http://${sut_pri}:8080/${test_uri} \
@@ -62,9 +63,9 @@ function run_tests {
                 --duration ${test_duration}s \
                 test.js"
             ssh_ $sut_pub systemctl stop $svc
-            scp_ $dri_pub:~/summary.json results/$svc-$test_uri-$test_concurrency.json
+            scp_ $dri_pub:~/summary.json results/${svc}-${test_uri}-${test_concurrency}$suffix.json
             wait $record
-            scp_ $sut_pub:~/$svc-$test_uri-$test_concurrency.txt results/
+            scp_ $sut_pub:~/${svc}-${test_uri}-${test_concurrency}${suffix}.txt results/
         done
     done
 
@@ -77,8 +78,8 @@ function postprocess_resources {
     do
         for svc in ${proxies[@]}
         do
-            raw=results/$svc-$test_type-$test_concurrency.txt
-            ready=results/$svc-$test_type-$test_concurrency-formatted.txt
+            raw=results/${svc}-${test_type}-${test_concurrency}${suffix}.txt
+            ready=results/${svc}-${test_type}-${test_concurrency}${suffix}-formatted.txt
             cleanup+=($ready)
 
             sed 1d $raw \
@@ -90,10 +91,10 @@ function postprocess_resources {
         gnuplot \
             -e "test_type='${test_type}'" \
             -e "par='${test_concurrency}'" \
-            -e "caddy='results/caddy-$test_type-$test_concurrency-formatted.txt'" \
-            -e "nginx='results/nginx-$test_type-$test_concurrency-formatted.txt'" \
+            -e "caddy='results/caddy-$test_type-$test_concurrency$suffix-formatted.txt'" \
+            -e "nginx='results/nginx-$test_type-$test_concurrency$suffix-formatted.txt'" \
             resources.gp \
-            > results/resources-${test_type}-${test_concurrency}c.svg
+            > results/resources-${test_type}-${test_concurrency}c${suffix}.svg
     done
     rm ${cleanup[@]}
 }
@@ -104,7 +105,7 @@ function postprocess_metrics {
     do
         for svc in ${proxies[@]}
         do
-            raw=results/$svc-$test_type-$test_concurrency.json
+            raw=results/${svc}-${test_type}-${test_concurrency}${suffix}.json
             jq --arg var http_req_duration -r -f metric.jq $raw \
                 | xargs echo "${svc}-${test_type}" \
                         >> results/plot.txt
@@ -112,7 +113,7 @@ function postprocess_metrics {
     done
 
     rs -Tc' ' < results/plot.txt | sponge results/plot.txt
-    cp results/{plot.txt,table-${test_concurrency}.txt}
+    cp results/{plot.txt,table-${test_concurrency}${suffix}.txt}
     sed -n '1p;/requests/p' results/plot.txt > results/requests.txt
     sed -n '1p;/error/p' results/plot.txt > results/errors.txt
     sed -i '/requests/d;/error/d' results/plot.txt
@@ -122,7 +123,7 @@ function postprocess_metrics {
             -e "errors='results/errors.txt'" \
             -e "concurrency='$test_concurrency'" \
             -e "test_type='duration'" \
-            metrics.gp > results/metrics-duration-${test_concurrency}c.svg
+            metrics.gp > results/metrics-duration-${test_concurrency}c${suffix}.svg
     rm results/{errors,plot,requests}.txt
 }
 
