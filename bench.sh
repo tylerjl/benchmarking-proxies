@@ -5,7 +5,7 @@ IFS=$'\n\t'
 
 test_duration=30
 test_concurrency=${VUS:-200}
-tests=(synthetic html)
+tests=(synthetic html proxy)
 proxies=(caddy nginx)
 suffix=${SUFFIX:-''}
 
