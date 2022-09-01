@@ -16,7 +16,7 @@ function config {
                nixos-rebuild \
                --flake ".#$1" \
                --target-host root@$2 \
-               --build-host localhost \
+               --build-host root@$2 \
                test
 }
 
