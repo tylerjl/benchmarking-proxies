@@ -116,7 +116,7 @@ function postprocess_metrics {
     cp results/{plot.txt,table-${test_concurrency}${suffix}.txt}
     sed -n '1p;/requests/p' results/plot.txt > results/requests.txt
     sed -n '1p;/error/p' results/plot.txt > results/errors.txt
-    sed -i '/requests/d;/error/d' results/plot.txt
+    sed -i '/requests/d;/error/d;/max/d;/min/d' results/plot.txt
     gnuplot \
             -e "data='results/plot.txt'" \
             -e "requests='results/requests.txt'" \
