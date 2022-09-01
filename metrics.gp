@@ -1,5 +1,5 @@
 reset
-set terminal svg size 900,500 mouse enhanced background rgb "#282c34" fontscale 1.1
+set terminal svg size 900,500 mouse enhanced background rgb "#282c34" fontscale 1.1 jsdir "/js/"
 set ylabel sprintf("%s (ms)", test_type) tc rgb "white"
 set grid ytics lw 0.5
 set style fill solid border
