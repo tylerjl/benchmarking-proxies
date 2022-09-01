@@ -8,7 +8,7 @@ export const options = {
 };
 
 export default function () {
-    http.get(`${__ENV.TEST_TARGET}`, { headers: { 'X-Hotdogs': 'aplenty" '}});
+    http.get(`${__ENV.TEST_TARGET}`, {headers: {'X-Hotdogs': 'aplenty'}});
 }
 
 export function handleSummary(data) {
