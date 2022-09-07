@@ -11,7 +11,7 @@ set style fill solid border
 set border lc rgb "white"
 set key tc rgb "white" outside autotitle columnheader
 set style data lines
-set title sprintf("Resource Utilization - %s (%s clients)", test_type, par) enhanced font ",16" tc rgb "white"
+set title sprintf("Resource Utilization - %s (%s clients)%s", test_type, par, append) enhanced font ",16" tc rgb "white"
 plot caddy using 1:2 smooth csplines, \
      nginx using 1:2 smooth csplines, \
      caddy using 1:3 axes x1y2 smooth csplines, \

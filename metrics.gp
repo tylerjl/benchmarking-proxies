@@ -7,7 +7,7 @@ set border lc rgb "white"
 set style data histograms
 set style histogram clustered gap 1
 set key tc rgb "white" outside below autotitle columnheader horizontal
-set title sprintf("HTTP - %s concurrent clients", concurrency) enhanced font ",16" tc rgb "white"
+set title sprintf("HTTP - %s concurrent clients%s", concurrency, append) enhanced font ",16" tc rgb "white"
 set multiplot
 set origin 0,0
 set size 0.7,1

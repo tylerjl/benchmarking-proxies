@@ -8,6 +8,12 @@ test_concurrency=${VUS:-200}
 tests=(synthetic html proxy)
 proxies=(caddy nginx)
 suffix=${SUFFIX:-''}
+if [[ -z "${suffix}" ]]
+then
+    append=''
+else
+    append=" (${suffix})"
+fi
 
 function ssh_ { ssh -F ssh_config $@; }
 function scp_ { scp -F ssh_config $@; }
@@ -93,6 +99,7 @@ function postprocess_resources {
             -e "par='${test_concurrency}'" \
             -e "caddy='results/caddy-$test_type-$test_concurrency$suffix-formatted.txt'" \
             -e "nginx='results/nginx-$test_type-$test_concurrency$suffix-formatted.txt'" \
+            -e "append='${append}'" \
             resources.gp \
             > results/resources-${test_type}-${test_concurrency}c${suffix}.svg
     done
@@ -123,6 +130,7 @@ function postprocess_metrics {
             -e "errors='results/errors.txt'" \
             -e "concurrency='$test_concurrency'" \
             -e "test_type='duration'" \
+            -e "append='${append}'" \
             metrics.gp > results/metrics-duration-${test_concurrency}c${suffix}.svg
     rm results/{errors,plot,requests}.txt
 }
