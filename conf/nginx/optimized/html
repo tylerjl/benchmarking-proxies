@@ -1,0 +1,21 @@
+events {
+    use epoll;
+    worker_connections 1024;
+}
+
+worker_processes auto;
+
+http {
+    access_log off;
+    sendfile on;
+    proxy_cache_path /tmp/nginx-cache keys_zone=cache:10m;
+
+    server {
+        listen 0.0.0.0:8080;
+        proxy_cache cache;
+
+        location / {
+            alias /srv/static/;
+        }
+    }
+}

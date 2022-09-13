@@ -1,0 +1,13 @@
+events {
+    use epoll;
+}
+
+http {
+    access_log off;
+
+    server {
+        listen 0.0.0.0:8080;
+
+        return 200 "Hello, world!";
+    }
+}

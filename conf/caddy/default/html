@@ -1,0 +1,4 @@
+:8080 {
+  root * /srv/static
+  file_server
+}
