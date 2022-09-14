@@ -18,7 +18,7 @@ Once any prerequisite setup steps have been completed, you should be able to run
   #+begin_src shell
   ./bench.sh
   #+end_src
-  
+
 You may start with additional "virtual users" -- k6's term for concurrent clients -- with an invocation like:
 
 #+begin_src shell
