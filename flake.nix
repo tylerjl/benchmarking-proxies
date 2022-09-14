@@ -52,9 +52,23 @@
         system = "x86_64-linux";
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ self.overlays.default ];
+          overlays = [
+            self.overlays.default
+            self.overlays.caddyMaster
+          ];
         };
       in {
+        overlays.caddyMaster = prev: final: {
+          caddyMaster = final.caddy.overrideAttrs (old: {
+            version = "master";
+            src = prev.fetchFromGitHub {
+              owner = "caddyserver";
+              repo = "caddy";
+              rev = "dd9813c65be3af8e222bda6e63f5eea9232c6eee";
+              sha256 = "sha256-Z9A2DRdX0LWjIKdHAHk2IRxsUzvC90Gf5ohFLXNHcsw=";
+            };
+          });
+        };
         overlays.default = prev: final: {
           static-html = self.packages.${system}.static-html;
           lighttpd = final.lighttpd.override {

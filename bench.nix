@@ -26,6 +26,8 @@
   services.caddy = {
     enable = true;
     configFile = ./Caddyfile;
+    # Uncomment this to use a custom Caddy build.
+    # package = pkgs.caddyMaster;
   };
   systemd.services.caddy = {
     serviceConfig.LimitNOFILE = "250000:250000";
