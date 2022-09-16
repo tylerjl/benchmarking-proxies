@@ -17,6 +17,7 @@ tests[html_small]='/index.html'
 tests[html_large]='/jquery-3.6.1.js'
 
 levels=(default optimized)
+variants=(baseline)
 
 function ssh_ { ssh -F ssh_config $@; }
 function scp_ { scp -F ssh_config $@; }
@@ -59,34 +60,37 @@ function run_tests {
     do
         for opt in ${levels[@]}
         do
-            if [[ ${svc} == "caddy" && ${opt} == "optimized" ]]
-            then
-                continue
-            fi
-            for test_ in ${!tests[@]}
+            for v in ${variants[@]}
             do
-                cp -f conf/$svc/$opt/$test_ ${proxies[$svc]}
-                config aws-bench $sut_pub
+                if [[ ${svc} == "caddy" && ${opt} == "optimized" ]]
+                then
+                    continue
+                fi
+                for test_ in ${!tests[@]}
+                do
+                    cp -f conf/$svc/$opt/$test_ ${proxies[$svc]}
+                    config aws-bench-${v} $sut_pub
 
-                ssh_ $sut_pub systemctl start $svc
-                sleep 3
-                pid=$(ssh_ $sut_pub systemctl show $svc --property=MainPID --value)
-                ssh_ $sut_pub "psrecord $pid \
-                    --include-children \
-                    --interval 0.1 \
-                    --duration $(( $test_duration + 15 )) \
-                    --log $svc-$opt-$test_-$test_concurrency.txt" &
-                record=$!
-                ssh_ $dri_pub \
-                    "TEST_TARGET=http://${sut_pri}:8080${tests[$test_]} \
-                    k6 run \
-                    --vus $test_concurrency \
-                    --duration ${test_duration}s \
-                    test.js"
-                ssh_ $sut_pub systemctl stop $svc
-                scp_ $dri_pub:~/summary.json results/${svc}-${opt}-${test_}-${test_concurrency}.json
-                wait $record
-                scp_ $sut_pub:~/${svc}-${opt}-${test_}-${test_concurrency}.txt results/
+                    ssh_ $sut_pub systemctl start $svc
+                    sleep 3
+                    pid=$(ssh_ $sut_pub systemctl show $svc --property=MainPID --value)
+                    ssh_ $sut_pub "psrecord $pid \
+                        --include-children \
+                        --interval 0.1 \
+                        --duration $(( $test_duration + 15 )) \
+                        --log $svc-$opt-$test_-$test_concurrency-$v.txt" &
+                    record=$!
+                    ssh_ $dri_pub \
+                        "TEST_TARGET=http://${sut_pri}:8080${tests[$test_]} \
+                        k6 run \
+                        --vus $test_concurrency \
+                        --duration ${test_duration}s \
+                        test.js"
+                    ssh_ $sut_pub systemctl stop $svc
+                    scp_ $dri_pub:~/summary.json results/${svc}-${opt}-${test_}-${test_concurrency}-${v}.json
+                    wait $record
+                    scp_ $sut_pub:~/${svc}-${opt}-${test_}-${test_concurrency}-${v}.txt results/
+                done
             done
         done
     done
@@ -100,19 +104,22 @@ function postprocess_resources {
     do
         for opt in ${levels[@]}
         do
-            for svc in ${!proxies[@]}
+            for v in ${variants[@]}
             do
-                if [[ ${svc} == "caddy" && ${opt} == "optimized" ]]
-                then
-                    continue
-                fi
-                raw=results/${svc}-${opt}-${test_}-${test_concurrency}.txt
+                for svc in ${!proxies[@]}
+                do
+                    if [[ ${svc} == "caddy" && ${opt} == "optimized" ]]
+                    then
+                        continue
+                    fi
+                    raw=results/${svc}-${opt}-${test_}-${test_concurrency}-${v}.txt
 
-                sed 1d $raw \
-                    | choose 0:2 \
-                    | sed '1i Time "'$svc' '${test_/_/ }' '${opt}' CPU %" "'$svc' '${test_/_/ }' '${opt}' Memory"' \
-                    | sponge $raw
-                results+=(-e "${svc}_${opt}_${test_}='${raw}'")
+                    sed 1d $raw \
+                        | choose 0:2 \
+                        | sed '1i Time "'$svc' '${test_/_/ }' '${opt}' CPU %" "'$svc' '${test_/_/ }' '${opt}' Memory"' \
+                        | sponge $raw
+                    results+=(-e "${svc}_${opt}_${test_}_${v}='${raw}'")
+                done
             done
         done
     done
@@ -127,22 +134,25 @@ function postprocess_metrics {
     do
         for opt in ${levels[@]}
         do
-            for svc in ${!proxies[@]}
+            for v in ${variants[@]}
             do
-                if [[ ${svc} == "caddy" && ${opt} == "optimized" ]]
-                then
-                    continue
-                fi
-                raw=results/${svc}-${opt}-${test_}-${test_concurrency}.json
-                jq --arg var http_req_duration -r -f metric.jq $raw \
-                    | xargs echo "${svc}-${opt}-${test_/_/-}" \
-                            >> results/plot.txt
+                for svc in ${!proxies[@]}
+                do
+                    if [[ ${svc} == "caddy" && ${opt} == "optimized" ]]
+                    then
+                        continue
+                    fi
+                    raw=results/${svc}-${opt}-${test_}-${test_concurrency}-${v}.json
+                    jq --arg var http_req_duration -r -f metric.jq $raw \
+                        | xargs echo "${svc}-${opt}-${test_/_/-}-${v}" \
+                                >> results/plot.txt
+                done
             done
         done
     done
 
-    rs -Tc' ' < results/plot.txt | sponge results/plot.txt
     cp results/{plot.txt,table-${test_concurrency}}
+    rs -Tc' ' < results/plot.txt | sponge results/plot.txt
     sed -n '1p;/requests/p' results/plot.txt > results/requests.txt
     sed -n '1p;/error/p' results/plot.txt > results/errors.txt
     sed -i '/requests/d;/error/d;/max/d;/min/d' results/plot.txt

@@ -66,9 +66,14 @@
         };
       in {
         overlays.caddy = prev: final: {
-          caddyMaster = final.caddy.overrideAttrs (old: {
+          caddySendfile = final.caddy.overrideAttrs (old: {
             patches = [
               ./sendfile.patch
+            ];
+          });
+          caddyNoMetrics = final.caddy.overrideAttrs (old: {
+            patches = [
+              ./no-metrics.patch
             ];
           });
         };
@@ -79,12 +84,30 @@
           };
         };
         nixosConfigurations = {
-          aws-bench = nixpkgs.lib.nixosSystem {
+          aws-bench-baseline = nixpkgs.lib.nixosSystem {
             inherit pkgs system;
             modules = [
               "${nixpkgs}/nixos/modules/virtualisation/amazon-image.nix"
               (import ./base.nix)
               (import ./bench.nix)
+            ];
+          };
+          aws-bench-no-metrics = nixpkgs.lib.nixosSystem {
+            inherit pkgs system;
+            modules = [
+              "${nixpkgs}/nixos/modules/virtualisation/amazon-image.nix"
+              (import ./base.nix)
+              (import ./bench.nix)
+              (import ./no-metrics.nix)
+            ];
+          };
+          aws-bench-sendfile = nixpkgs.lib.nixosSystem {
+            inherit pkgs system;
+            modules = [
+              "${nixpkgs}/nixos/modules/virtualisation/amazon-image.nix"
+              (import ./base.nix)
+              (import ./bench.nix)
+              (import ./sendfile.nix)
             ];
           };
           aws-driver = nixpkgs.lib.nixosSystem {
@@ -101,6 +124,7 @@
               nixos-shell.nixosModules.nixos-shell
               (import ./base.nix)
               (import ./bench.nix)
+              (import ./no-metrics.nix)
               (import ./driver.nix)
               ({ ... }: {
                 config.services.getty.autologinUser = nixpkgs.lib.mkDefault "root";

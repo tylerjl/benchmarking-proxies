@@ -1,0 +1,22 @@
+diff --git a/modules/caddyhttp/routes.go b/modules/caddyhttp/routes.go
+index 7b2871ff..02443757 100644
+--- a/modules/caddyhttp/routes.go
++++ b/modules/caddyhttp/routes.go
+@@ -257,7 +257,7 @@ func wrapRoute(route Route) Middleware {
+ // won't be overwritten in future loop iterations.
+ func wrapMiddleware(ctx caddy.Context, mh MiddlewareHandler) Middleware {
+ 	// wrap the middleware with metrics instrumentation
+-	metricsHandler := newMetricsInstrumentedHandler(caddy.GetModuleName(mh), mh)
++	// metricsHandler := newMetricsInstrumentedHandler(caddy.GetModuleName(mh), mh)
+ 
+ 	return func(next Handler) Handler {
+ 		// copy the next handler (it's an interface, so it's
+@@ -269,7 +269,7 @@ func wrapMiddleware(ctx caddy.Context, mh MiddlewareHandler) Middleware {
+ 		return HandlerFunc(func(w http.ResponseWriter, r *http.Request) error {
+ 			// TODO: This is where request tracing could be implemented
+ 			// TODO: see what the std lib gives us in terms of stack tracing too
+-			return metricsHandler.ServeHTTP(w, r, nextCopy)
++			return mh.ServeHTTP(w, r, nextCopy)
+ 		})
+ 	}
+ }
