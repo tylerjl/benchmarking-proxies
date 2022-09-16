@@ -3,6 +3,10 @@
     devshell.url    = "github:numtide/devshell";
     nixos-shell.url = "github:Mic92/nixos-shell";
     nixpkgs.url     = "github:NixOS/nixpkgs/nixos-22.05";
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -14,6 +18,7 @@
           overlays = [
             inputs.devshell.overlay
             self.overlays.default
+            self.overlays.caddy
           ];
         };
       in with pkgs; rec {
@@ -44,9 +49,11 @@
             wrk2
           ];
         };
-        packages.static-html = pkgs.buildEnv {
-          name = "static-html";
-          paths = [ ./static ];
+        packages = {
+          static-html = pkgs.buildEnv {
+            name = "static-html";
+            paths = [ ./static ];
+          };
         };
       })) // (let
         system = "x86_64-linux";
@@ -54,19 +61,15 @@
           inherit system;
           overlays = [
             self.overlays.default
-            self.overlays.caddyMaster
+            self.overlays.caddy
           ];
         };
       in {
-        overlays.caddyMaster = prev: final: {
+        overlays.caddy = prev: final: {
           caddyMaster = final.caddy.overrideAttrs (old: {
-            version = "master";
-            src = prev.fetchFromGitHub {
-              owner = "caddyserver";
-              repo = "caddy";
-              rev = "dd9813c65be3af8e222bda6e63f5eea9232c6eee";
-              sha256 = "sha256-Z9A2DRdX0LWjIKdHAHk2IRxsUzvC90Gf5ohFLXNHcsw=";
-            };
+            patches = [
+              ./sendfile.patch
+            ];
           });
         };
         overlays.default = prev: final: {
