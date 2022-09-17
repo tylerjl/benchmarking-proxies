@@ -1,0 +1,3 @@
+server.port = 8080
+server.document-root = "/srv/static"
+mimetype.assign = (".html" => "text/html", ".js" => "text/javascript")

@@ -9,6 +9,7 @@ test_concurrency=${VUS:-200}
 declare -A proxies
 proxies[caddy]=Caddyfile
 proxies[nginx]=nginx.conf
+proxies[lighttpd]=nginx.conf
 
 declare -A tests
 tests[synthetic]=''

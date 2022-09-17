@@ -47,3 +47,27 @@ plot nginx_optimized_html_large_baseline using 1:2 smooth csplines, \
      nginx_optimized_proxy_baseline using 1:3 axes x1y2 smooth csplines, \
      nginx_optimized_synthetic_baseline using 1:2 smooth csplines, \
      nginx_optimized_synthetic_baseline using 1:3 axes x1y2 smooth csplines
+
+set title sprintf("Resource Utilization - lighttpd - Default - %s clients", par) enhanced font ",16" tc rgb "white"
+set origin 0,0.5
+set size 0.5,0.5
+plot lighttpd_default_html_large_baseline using 1:2 smooth csplines, \
+     lighttpd_default_html_large_baseline using 1:3 axes x1y2 smooth csplines, \
+     lighttpd_default_html_small_baseline using 1:2 smooth csplines, \
+     lighttpd_default_html_small_baseline using 1:3 axes x1y2 smooth csplines, \
+     lighttpd_default_proxy_baseline using 1:2 smooth csplines, \
+     lighttpd_default_proxy_baseline using 1:3 axes x1y2 smooth csplines, \
+     lighttpd_default_synthetic_baseline using 1:2 smooth csplines, \
+     lighttpd_default_synthetic_baseline using 1:3 axes x1y2 smooth csplines
+
+set title sprintf("Resource Utilization - lighttpd - Optimized - %s clients", par) enhanced font ",16" tc rgb "white"
+set origin 0.5,0.5
+set size 0.5,0.5
+plot lighttpd_optimized_html_large_baseline using 1:2 smooth csplines, \
+     lighttpd_optimized_html_large_baseline using 1:3 axes x1y2 smooth csplines, \
+     lighttpd_optimized_html_small_baseline using 1:2 smooth csplines, \
+     lighttpd_optimized_html_small_baseline using 1:3 axes x1y2 smooth csplines, \
+     lighttpd_optimized_proxy_baseline using 1:2 smooth csplines, \
+     lighttpd_optimized_proxy_baseline using 1:3 axes x1y2 smooth csplines, \
+     lighttpd_optimized_synthetic_baseline using 1:2 smooth csplines, \
+     lighttpd_optimized_synthetic_baseline using 1:3 axes x1y2 smooth csplines
