@@ -1,0 +1,30 @@
+server.port = 8080
+server.document-root = "/srv/static"
+mimetype.assign = (".html" => "text/html", ".js" => "text/javascript")
+
+server.modules += ("mod_proxy")
+proxy.server = ( "" => (( "host" => "127.0.0.1", "port" => 8081 )))
+# FYI: lighttpd can also reverse-proxy to a (faster) unix domain socket
+
+
+# benchmarking: handle large number (10k) of simultaneous connections
+#               lighttpd uses slightly less memory when these are tuned smaller
+server.max-fds = 32768
+server.max-connections = 10000
+
+# benchmarking: allow up to 64k-1 requests on the same connection (default:1000)
+server.max-keep-alive-requests = 65535
+
+# benchmarking: tune to number of CPUs if > 1 and only if lighttpd is CPU-bound
+server.max-worker = 4
+
+
+# benchmarking micro-optimization: load only server.modules; no default modules
+server.compat-module-load = "disable"
+
+# benchmarking micro-optimization: omit "Server" response header
+server.tag = ""
+
+# benchmarking micro-optimization: omit "Accept-Ranges: bytes" response header
+# (prefer to allow for production website; Range is generally desirable)
+server.range-requests = "disable"

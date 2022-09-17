@@ -50,7 +50,7 @@
     enableModules = [ "mod_magnet" ];
     document-root = "${pkgs.static-html}";
     extraConfig = ''
-      magnet.attract-physical-path-to = ( "${luaScript}" )
+      magnet.attract-raw-url-to = ( "${luaScript}" )
     '';
   };
 }
