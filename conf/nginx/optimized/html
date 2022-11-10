@@ -1,6 +1,8 @@
 worker_processes auto; # default 1
 error_log stderr error; # default to logs/error.log
 
+keepalive_requests 10000;
+
 events {
     #use epoll; by default use the best option
     worker_connections 2500; # default 512
