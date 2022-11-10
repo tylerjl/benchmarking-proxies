@@ -1,15 +1,11 @@
-events {
-    use epoll;
-}
-
 http {
     access_log off;
+    root /srv/static;
 
     server {
         listen 0.0.0.0:8080;
 
         location / {
-            alias /srv/static/;
         }
     }
 }
