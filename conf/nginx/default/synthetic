@@ -1,7 +1,3 @@
-events {
-    use epoll;
-}
-
 http {
     access_log off;
 
