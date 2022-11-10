@@ -6,6 +6,16 @@ This is an accompanying repository for a forthcoming blog post about reverse pro
 
 Once any prerequisite setup steps have been completed, you should be able to run, measure, and report on benchmarks with ~./bench.sh~.
 
+** Environment details
+
+2 c5.xlarge in aws
+(4 Virtual CPUs and 8 Gig memory)
+
+Nginx version: ??
+Caddy version: ??
+
+K6 as performance load testing
+
 ** Getting Started
 
 - Install [[https://nixos.wiki/wiki/Flakes][nix flakes]].
