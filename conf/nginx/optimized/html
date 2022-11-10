@@ -1,21 +1,19 @@
-events {
-    use epoll;
-    worker_connections 1024;
-}
+worker_processes auto; # default 1
+error_log stderr error; # default to logs/error.log
 
-worker_processes auto;
+events {
+    #use epoll; by default use the best option
+    worker_connections 2500; # default 512
+}
 
 http {
     access_log off;
     sendfile on;
-    proxy_cache_path /tmp/nginx-cache keys_zone=cache:10m;
 
     server {
         listen 0.0.0.0:8080;
-        proxy_cache cache;
 
         location / {
-            alias /srv/static/;
         }
     }
 }
