@@ -1,21 +1,23 @@
-events {
-    use epoll;
-    worker_connections 1024;
-}
+worker_processes auto; # default 1
+error_log stderr error; # default to logs/error.log
 
-worker_processes auto;
+keepalive_requests 10000;
+
+events {
+    #use epoll; by default use the best option
+    worker_connections 2500; # default 512
+}
 
 http {
     access_log off;
-    sendfile on;
-    proxy_cache_path /tmp/nginx-cache keys_zone=cache:10m;
 
     server {
         listen 0.0.0.0:8080;
-        proxy_cache cache;
 
         location / {
             proxy_pass http://127.0.0.1:8081;
+            proxy_http_version 1.1;
+            proxy_set_header Connection "";
         }
     }
 }
